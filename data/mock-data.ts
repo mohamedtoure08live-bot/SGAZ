@@ -619,8 +619,8 @@ export const INITIAL_ORDERS: Order[] = [
 export const MOCK_SETTINGS: AppSettings = {
   serviceStartTime: '06:00',
   serviceEndTime: '21:30',
-  officialPhone: '+225 27 22 55 44 33',
-  officialWhatsapp: '+225 07 88 99 00 11',
+  officialPhone: '+225 07 03 03 74 04',
+  officialWhatsapp: '+225 07 03 03 74 04',
   defaultSosgazCommission: 500,
   isExpressDeliveryEnabled: true,
   expressSurcharge: 1000,

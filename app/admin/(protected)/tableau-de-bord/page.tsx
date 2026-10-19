@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useOrders } from '@/context/order-context';
 import { formatFCFA, formatDateAbidjan, formatPhoneCI } from '@/lib/format';
 import { StatusBadge } from '@/components/ui/badge';
+import { Logo } from '@/components/ui/logo';
 import {
   ShoppingCart,
   Clock,
@@ -41,24 +42,40 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* En-tête du Dashboard */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Tableau de Bord des Opérations
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Supervision en temps réel des commandes, livraisons et dépôts partenaires à Abidjan.
-          </p>
+      {/* BANNIÈRE OFFICIELLE DE MARQUE ET CONSOLE D'EXPLOITATION */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 rounded-3xl p-6 sm:p-7 border border-slate-800/90 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          <div className="bg-white p-3 rounded-2xl border border-slate-200/90 shadow-xl shadow-black/30 shrink-0">
+            <Logo size="lg" />
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Console d&apos;Exploitation Active
+              </span>
+              <span className="text-[11px] text-slate-400 font-medium">
+                Abidjan • 7j/7
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              Tableau de Bord des Opérations
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl">
+              Supervision en temps réel des commandes, livraisons express et dépôts partenaires à Abidjan.
+            </p>
+          </div>
         </div>
 
-        <Link
-          href="/admin/commandes"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-red-600/30 transition-all self-start sm:self-auto"
-        >
-          <span>Gérer le pipeline</span>
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div className="flex items-center gap-3 w-full md:w-auto self-stretch md:self-auto justify-end">
+          <Link
+            href="/admin/commandes"
+            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 transition-all active:scale-95"
+          >
+            <span>Gérer le pipeline</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
 
       {/* Alerte Urgence si commandes en attente */}

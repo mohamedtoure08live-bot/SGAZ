@@ -113,16 +113,16 @@ function AdminProtectedContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-slate-900 flex text-slate-100 font-sans">
       {/* SIDEBAR DESKTOP */}
       <aside className="hidden lg:flex lg:flex-col lg:w-72 bg-slate-950 border-r border-slate-800 p-5 shrink-0">
-        {/* Logo */}
+        {/* Logo Officiel Haute Visibilité */}
         <div className="pb-6 border-b border-slate-800/80">
-          <Link href="/admin/tableau-de-bord">
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-              <Logo size="md" showTagline={false} />
+          <Link href="/admin/tableau-de-bord" className="block group">
+            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-xl shadow-black/30 group-hover:shadow-red-500/20 group-hover:border-red-300 transition-all flex items-center justify-center">
+              <Logo size="lg" />
             </div>
           </Link>
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3.5 flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Back-Office Exploitation
+              Console d&apos;Exploitation
             </span>
             <span
               className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
@@ -239,9 +239,22 @@ function AdminProtectedContent({ children }: { children: React.ReactNode }) {
             >
               {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
-            <h2 className="text-sm sm:text-base font-extrabold text-white">
-              SOSGAZ DOMESTIC Console
-            </h2>
+            <div className="flex items-center gap-2.5">
+              <div className="bg-white p-1 rounded-xl border border-slate-200 shadow-sm lg:hidden flex items-center justify-center">
+                <Logo size="sm" />
+              </div>
+              <div>
+                <h2 className="text-sm sm:text-base font-extrabold text-white leading-tight">
+                  SOSGAZ DOMESTIC
+                </h2>
+                <span className="text-[10px] text-red-400 font-bold uppercase tracking-wider block sm:hidden">
+                  Console d&apos;Exploitation
+                </span>
+              </div>
+              <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                • Supervision en temps réel Abidjan
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

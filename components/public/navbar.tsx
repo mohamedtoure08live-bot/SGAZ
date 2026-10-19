@@ -24,13 +24,13 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Logo de marque */}
-        <Link href="/" className="hover:opacity-95 transition-opacity">
-          <Logo size="md" showTagline={true} />
+        {/* Logo de marque avec respiration */}
+        <Link href="/" className="hover:opacity-95 transition-opacity mr-8 shrink-0 flex items-center">
+          <Logo size="md" />
         </Link>
 
         {/* Liens de navigation Desktop */}
-        <nav className="hidden lg:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-7">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (

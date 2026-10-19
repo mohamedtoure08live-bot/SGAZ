@@ -25,7 +25,11 @@ export default function ContactPage() {
         {/* Coordonnées Directes (5 colonnes) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Carte Téléphone */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center gap-4">
+          <a
+            href={`tel:${MOCK_SETTINGS.officialPhone.replace(/\s+/g, '')}`}
+            className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center gap-4 hover:border-red-300 hover:shadow-md transition-all block"
+            title="Appeler SOSGAZ"
+          >
             <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
               <Phone className="w-6 h-6" />
             </div>
@@ -34,10 +38,16 @@ export default function ContactPage() {
               <p className="text-base font-extrabold text-slate-900 mt-0.5">{MOCK_SETTINGS.officialPhone}</p>
               <span className="text-[11px] text-slate-500">Service client ouvert 7j/7</span>
             </div>
-          </div>
+          </a>
 
           {/* Carte WhatsApp */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center gap-4">
+          <a
+            href={`https://wa.me/${MOCK_SETTINGS.officialWhatsapp.replace(/\D/g, '')}?text=Bonjour%20SOSGAZ,%20je%20souhaite%20un%20renseignement`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center gap-4 hover:border-emerald-300 hover:shadow-md transition-all block"
+            title="Écrire sur WhatsApp"
+          >
             <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
               <MessageCircle className="w-6 h-6" />
             </div>
@@ -46,7 +56,7 @@ export default function ContactPage() {
               <p className="text-base font-extrabold text-slate-900 mt-0.5">{MOCK_SETTINGS.officialWhatsapp}</p>
               <span className="text-[11px] text-slate-500">Réponse moyenne en 3 minutes</span>
             </div>
-          </div>
+          </a>
 
           {/* Carte Horaires */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center gap-4">

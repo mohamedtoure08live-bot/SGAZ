@@ -11,7 +11,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Colonne 1 : Présentation de marque */}
           <div className="lg:col-span-2 space-y-4">
-            <Logo size="md" showTagline={true} />
+            <Logo size="md" inverted={true} />
             <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-sm mt-3">
               Le premier service digital de livraison express de gaz domestique à Abidjan.
               Commandez votre recharge ou votre première bouteille sans compte en 1 clic.
