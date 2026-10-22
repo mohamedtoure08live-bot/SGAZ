@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useOrders } from '@/context/order-context';
 import { formatFCFA } from '@/lib/format';
 import { calculateOrderPricing } from '@/lib/pricing';
+import { validateOrderInput } from '@/lib/validations';
 import { ChoiceCard } from '@/components/public/choice-card';
 import { OrderSummaryCard } from '@/components/public/order-summary-card';
 import { MOCK_PRODUCTS, MOCK_PRICES, MOCK_COMMUNES, MOCK_SETTINGS } from '@/data/mock-data';
@@ -22,6 +23,8 @@ import {
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
+
+import { createOrderAction } from '@/app/actions/orders';
 
 function CommanderContent() {
   const router = useRouter();
@@ -83,29 +86,60 @@ function CommanderContent() {
   };
 
   const handleSubmitOrder = async () => {
-    if (!landmark.trim() || !customerPhone.trim() || !customerName.trim()) {
-      alert('Veuillez remplir votre nom, votre numéro et un repère visuel précis.');
+    const validation = validateOrderInput({
+      customerName,
+      customerPhone,
+      addressLandmark: landmark,
+      commune: currentCommune.name,
+      quartier: quartierName,
+      selectedFormat,
+      hasEmptyBottle,
+      deliveryMode,
+    });
+
+    if (!validation.isValid) {
+      const firstError = Object.values(validation.errors)[0];
+      alert(firstError);
       return;
     }
 
+    const sanitized = validation.sanitizedData!;
     setIsSubmitting(true);
 
     try {
-      // Simulation latence réseau
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      // Appel à la Server Action Full Stack Supabase
+      const result = await createOrderAction({
+        customerName: sanitized.customerName,
+        customerPhone: sanitized.customerPhone,
+        commune: sanitized.commune,
+        quartier: sanitized.quartier,
+        addressLandmark: sanitized.addressLandmark,
+        selectedFormat: sanitized.selectedFormat,
+        hasEmptyBottle: sanitized.hasEmptyBottle,
+        deliveryMode: sanitized.deliveryMode,
+      });
 
-      const newOrder = createOrder({
-        customerName,
-        customerPhone,
-        commune: currentCommune.name,
-        quartier: quartierName,
-        addressLandmark: landmark,
-        deliveryMode,
-        deliveryFee: pricing.totalDeliveryCost,
-        subtotalProducts: pricing.itemsSubtotal,
-        totalAmount: pricing.totalAmount,
-        sosgazCommission: pricing.sosgazCommission,
-        partnerPayout: pricing.partnerPayout,
+      if (!result.success || !result.publicToken) {
+        setIsSubmitting(false);
+        alert(result.error || 'Une erreur est survenue lors de la création de la commande.');
+        return;
+      }
+
+      // Synchronisation de l'état local dans l'application
+      createOrder({
+        id: result.orderId,
+        publicToken: result.publicToken,
+        customerName: sanitized.customerName,
+        customerPhone: sanitized.customerPhone,
+        commune: sanitized.commune,
+        quartier: sanitized.quartier,
+        addressLandmark: sanitized.addressLandmark,
+        deliveryMode: sanitized.deliveryMode,
+        deliveryFee: Math.max(0, pricing.totalDeliveryCost),
+        subtotalProducts: Math.max(0, pricing.itemsSubtotal),
+        totalAmount: Math.max(0, pricing.totalAmount),
+        sosgazCommission: Math.max(0, pricing.sosgazCommission),
+        partnerPayout: Math.max(0, pricing.partnerPayout),
         items: [
           {
             id: `item-${activeProduct.id}`,
@@ -115,17 +149,17 @@ function CommanderContent() {
             brandName: activeProduct.brandName,
             quantity: 1,
             hasEmptyBottle,
-            unitPrice,
-            totalPrice: unitPrice,
+            unitPrice: Math.max(0, unitPrice),
+            totalPrice: Math.max(0, unitPrice),
           },
         ],
       });
 
-      router.push(`/commande/confirmation?token=${newOrder.publicToken}`);
-    } catch (error) {
-      console.error(error);
+      router.push(`/commande/confirmation?token=${encodeURIComponent(result.publicToken)}`);
+    } catch (err) {
+      console.error('Erreur soumission commande:', err);
       setIsSubmitting(false);
-      alert('Une erreur est survenue lors de la création de la commande.');
+      alert('Une erreur est survenue lors de la transmission de la commande.');
     }
   };
 

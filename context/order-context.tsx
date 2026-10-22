@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Order, OrderStatus, UserRole, AuditLog } from '@/types';
 import { INITIAL_ORDERS, MOCK_AUDIT_LOGS, MOCK_PARTNERS, MOCK_COURIERS } from '@/data/mock-data';
 import { validateStatusTransition } from '@/lib/order-state';
+import { getAllOrdersAction, updateOrderStatusAction } from '@/app/actions/orders';
 
 interface OrderContextType {
   orders: Order[];
@@ -42,7 +43,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [currentRole, setCurrentRoleState] = useState<UserRole>('admin');
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Charger depuis le localStorage au montage
+  // Charger depuis le localStorage au montage puis synchroniser avec Supabase
   useEffect(() => {
     try {
       const savedOrders = localStorage.getItem(STORAGE_KEY);
@@ -64,6 +65,23 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     } catch {
       queueMicrotask(() => setIsLoaded(true));
     }
+
+    // Récupérer les données Supabase en arrière-plan
+    getAllOrdersAction()
+      .then((serverOrders) => {
+        if (serverOrders && serverOrders.length > 0) {
+          setOrders((prev) => {
+            // Fusion intelligente par ID pour ne pas écraser les créations récentes
+            const orderMap = new Map<string, Order>();
+            serverOrders.forEach((o) => orderMap.set(o.id, o));
+            prev.forEach((o) => {
+              if (!orderMap.has(o.id)) orderMap.set(o.id, o);
+            });
+            return Array.from(orderMap.values());
+          });
+        }
+      })
+      .catch((err) => console.error('Erreur sync commandes Supabase:', err));
   }, []);
 
   // Sauvegarder dans le localStorage
@@ -106,8 +124,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
   const createOrder = (orderData: Partial<Order> & { customerName: string; customerPhone: string }): Order => {
     const nextNumber = orders.length + 101;
-    const orderId = `SGZ-2026-${String(nextNumber).padStart(6, '0')}`;
-    const token = `tok-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
+    const orderId = orderData.id || `SGZ-2026-${String(nextNumber).padStart(6, '0')}`;
+    const token = orderData.publicToken || `tok-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`;
 
     const newOrder: Order = {
       id: orderId,
@@ -216,6 +234,15 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       `Statut passé de ${order.status} à ${targetStatus}${reason ? ` (Motif : ${reason})` : ''}`
     );
 
+    // Synchronisation en arrière-plan avec Supabase
+    updateOrderStatusAction({
+      orderId,
+      newStatus: targetStatus,
+      changedBy: currentRole === 'admin' ? 'Administrateur (M. Sylla)' : 'Opérateur (Aline K.)',
+      authorRole: currentRole,
+      reason,
+    }).catch((err) => console.error('Erreur updateOrderStatusAction:', err));
+
     return { success: true };
   };
 
@@ -272,6 +299,17 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       orderId,
       `Assignée au dépôt ${partner.name} et livreur ${courier.fullName}`
     );
+
+    // Synchronisation en arrière-plan avec Supabase
+    updateOrderStatusAction({
+      orderId,
+      newStatus: 'LIVREUR_AFFECTE',
+      changedBy: currentRole === 'admin' ? 'Administrateur (M. Sylla)' : 'Opérateur (Aline K.)',
+      authorRole: currentRole,
+      reason: `Affectation au dépôt "${partner.name}" et livreur "${courier.fullName}"`,
+      partnerId: partner.id,
+      courierId: courier.id,
+    }).catch((err) => console.error('Erreur assignPartnerAndCourier Supabase:', err));
 
     return { success: true };
   };

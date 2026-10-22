@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { formatFCFA } from '@/lib/format';
 import { MOCK_COMMUNES, MOCK_SETTINGS, MOCK_BRANDS } from '@/data/mock-data';
+import { AdBannerCarousel } from '@/components/public/ad-banner-carousel';
 
 export default function HomePage() {
   const router = useRouter();
@@ -281,7 +282,12 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================================
-          3. SECTION PARTENAIRES OFFICIELS & ÉCOSYSTÈME DE CONFIANCE (LOGOS FOURNIS)
+          3. CARROUSEL PUBLICITAIRE & OFFRES BOUTIQUES PARTENAIRES (GAZINIÈRES & ÉLECTROMÉNAGER)
+          ========================================================================= */}
+      <AdBannerCarousel />
+
+      {/* =========================================================================
+          4. SECTION PARTENAIRES OFFICIELS & ÉCOSYSTÈME DE CONFIANCE (LOGOS FOURNIS)
           ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center max-w-3xl mx-auto mb-14">
@@ -301,12 +307,12 @@ export default function HomePage() {
 
         {/* Grille des 3 Partenaires avec leurs vrais logos */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Partenaire 1 : MY GUIDE */}
+          {/* Partenaire 1 : MyGuide Côte d'Ivoire */}
           <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-md hover:shadow-xl transition-all flex flex-col items-center text-center group">
             <div className="w-full h-36 relative mb-6 flex items-center justify-center bg-slate-50/70 rounded-2xl p-4 border border-slate-100 group-hover:border-slate-200 transition-colors">
               <Image
                 src="/images/partner-myguide.jpg"
-                alt="Logo Partenaire MY GUIDE"
+                alt="Logo Partenaire MyGuide Côte d'Ivoire"
                 width={240}
                 height={120}
                 className="max-h-28 w-auto object-contain transition-transform group-hover:scale-105"
@@ -314,21 +320,20 @@ export default function HomePage() {
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 mb-2">
               <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Cartographie & Adresses</span>
+              <span>Guide Urbain de Référence</span>
             </div>
-            <h3 className="text-lg font-black text-slate-900">MY GUIDE</h3>
+            <h3 className="text-lg font-black text-slate-900">MyGuide Côte d&apos;Ivoire</h3>
             <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
-              Le guide urbain de référence à Abidjan. Partenaire cartographique pour le repérage
-              précis des carrefours, pharmacies et quartiers de livraison.
+              Le guide de référence urbain à Abidjan.
             </p>
           </div>
 
-          {/* Partenaire 2 : EPARGNANT ASSISTANCE CONSEIL */}
+          {/* Partenaire 2 : EPARGNANT */}
           <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-md hover:shadow-xl transition-all flex flex-col items-center text-center group">
             <div className="w-full h-36 relative mb-6 flex items-center justify-center bg-[#0d1b33] rounded-2xl p-4 border border-slate-800 group-hover:border-slate-700 transition-colors">
               <Image
                 src="/images/partner-epargnant.jpg"
-                alt="Logo Partenaire EPARGNANT ASSISTANCE CONSEIL"
+                alt="Logo Partenaire EPARGNANT"
                 width={200}
                 height={120}
                 className="max-h-28 w-auto object-contain transition-transform group-hover:scale-105"
@@ -336,21 +341,20 @@ export default function HomePage() {
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 mb-2">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-              <span>Conseil & Rigueur</span>
+              <span>Éducation Financière</span>
             </div>
-            <h3 className="text-lg font-black text-slate-900">EPARGNANT ASSISTANCE CONSEIL</h3>
+            <h3 className="text-lg font-black text-slate-900">EPARGNANT</h3>
             <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
-              Cabinet d&apos;expertise financière et conseil aux ménages. Accompagnement de notre
-              modèle pour garantir la juste tarification et la sécurité des transactions.
+              Le meilleur modèle d&apos;éducation financière, parfait pour réaliser vos rêves.
             </p>
           </div>
 
-          {/* Partenaire 3 : ACAS (ACADEMIE COOL AFRICA STAR) */}
+          {/* Partenaire 3 : ACAS-FOOT */}
           <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-md hover:shadow-xl transition-all flex flex-col items-center text-center group">
             <div className="w-full h-36 relative mb-6 flex items-center justify-center bg-slate-950 rounded-2xl p-4 border border-slate-800 group-hover:border-slate-700 transition-colors">
               <Image
                 src="/images/partner-acas.jpg"
-                alt="Logo Partenaire ACAS - Academie Cool Africa Star"
+                alt="Logo Partenaire ACAS-FOOT"
                 width={200}
                 height={120}
                 className="max-h-28 w-auto object-contain transition-transform group-hover:scale-105"
@@ -358,12 +362,11 @@ export default function HomePage() {
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 mb-2">
               <Award className="w-3.5 h-3.5 text-amber-600" />
-              <span>Jeunesse & Dynamique Sportive</span>
+              <span>Insertion Par Le Sport</span>
             </div>
-            <h3 className="text-lg font-black text-slate-900">ACAS • COOL AFRICA STAR</h3>
+            <h3 className="text-lg font-black text-slate-900">ACAS-FOOT</h3>
             <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
-              Fondée en 2008 en Côte d&apos;Ivoire, l&apos;Académie Cool Africa Star forme les
-              talents sportifs de demain et soutient l&apos;insertion de la jeunesse ivoirienne.
+              Formation et insertion professionnelle des jeunes par le football.
             </p>
           </div>
         </div>

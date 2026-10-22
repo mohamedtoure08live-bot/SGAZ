@@ -1,12 +1,15 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useOrders } from '@/context/order-context';
 import { formatFCFA, formatDateAbidjan } from '@/lib/format';
 import { StatusBadge } from '@/components/ui/badge';
 import { MOCK_SETTINGS } from '@/data/mock-data';
+import { getOrderByTokenAction } from '@/app/actions/orders';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
+import { Order } from '@/types';
 import {
   CheckCircle2,
   Phone,
@@ -16,17 +19,104 @@ import {
   Flame,
   ArrowRight,
   HelpCircle,
+  Loader2,
+  Radio,
 } from 'lucide-react';
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-  const { getOrderByToken, orders } = useOrders();
+  const { getOrderByToken } = useOrders();
 
-  // Trouver la commande par son jeton sécurisé, ou prendre la dernière créée
-  const order = token ? getOrderByToken(token) : orders[0];
+  const contextOrder = token ? getOrderByToken(token) : undefined;
 
-  if (!order) {
+  // État de la commande (priorité sur la base de données Supabase, avec fallback contextuel instantané)
+  const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(!contextOrder);
+  const [isRealtimeActive, setIsRealtimeActive] = useState<boolean>(false);
+
+  const activeOrder = order || contextOrder;
+
+  useEffect(() => {
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    // Récupérer les données officielles depuis l'action serveur Supabase
+    getOrderByTokenAction(token)
+      .then((dbOrder) => {
+        if (isMounted && dbOrder) {
+          setOrder(dbOrder);
+        }
+      })
+      .catch((err) => {
+        console.error('Erreur chargement commande Supabase:', err);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    // 3. Abonnement temps réel Supabase Realtime
+    try {
+      const supabase = getSupabaseBrowserClient();
+      if (supabase) {
+        const channel = supabase
+          .channel(`order-realtime-${token}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'orders',
+              filter: `public_token=eq.${token}`,
+            },
+            (payload) => {
+              if (payload.new && isMounted) {
+                // Recharger la commande complète avec ses items et son historique
+                getOrderByTokenAction(token).then((updated) => {
+                  if (updated && isMounted) {
+                    setOrder(updated);
+                  }
+                });
+              }
+            }
+          )
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED' && isMounted) {
+              setIsRealtimeActive(true);
+            }
+          });
+
+        return () => {
+          isMounted = false;
+          supabase.removeChannel(channel);
+        };
+      }
+    } catch {
+      // Ignorer si Supabase non initialisé
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [token]);
+
+  if (isLoading && !activeOrder) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-24 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 animate-spin">
+          <Loader2 className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-800">Recherche de votre commande...</h2>
+        <p className="text-slate-500 text-sm mt-1">Connexion sécurisée en cours...</p>
+      </div>
+    );
+  }
+
+  if (!activeOrder) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
         <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-4">
@@ -34,7 +124,7 @@ function ConfirmationContent() {
         </div>
         <h1 className="text-2xl font-black text-slate-900">Commande introuvable</h1>
         <p className="text-slate-500 text-sm mt-2">
-          Le lien de confirmation est invalide ou la commande a expiré.
+          Le lien de confirmation est invalide ou la commande n&apos;a pas encore été synchronisée.
         </p>
         <Link
           href="/commander"
@@ -46,9 +136,9 @@ function ConfirmationContent() {
     );
   }
 
-  const primaryItem = order.items[0];
+  const primaryItem = activeOrder.items[0];
   const whatsappMessage = encodeURIComponent(
-    `Bonjour SOSGAZ, j'ai passé la commande ${order.id} pour une bouteille ${primaryItem?.formatLabel || 'de gaz'} à ${order.commune}. Pouvez-vous me confirmer la disponibilité ?`
+    `Bonjour SOSGAZ, j'ai passé la commande ${activeOrder.id} pour une bouteille ${primaryItem?.formatLabel || 'de gaz'} à ${activeOrder.commune}. Pouvez-vous me confirmer la disponibilité ?`
   );
 
   return (
@@ -61,7 +151,7 @@ function ConfirmationContent() {
         </div>
 
         <span className="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-800 mb-3">
-          Numéro Unique : {order.id}
+          Numéro Unique : {activeOrder.id}
         </span>
 
         <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
@@ -73,11 +163,20 @@ function ConfirmationContent() {
         </p>
 
         {/* Badge de Statut en Direct */}
-        <div className="mt-6 inline-flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Statut actuel :
-          </span>
-          <StatusBadge status={order.status} size="lg" />
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <div className="inline-flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Statut actuel :
+            </span>
+            <StatusBadge status={activeOrder.status} size="lg" />
+          </div>
+
+          {isRealtimeActive && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Synchronisé en direct
+            </span>
+          )}
         </div>
 
         {/* Boutons d'Action Rapide : WhatsApp & Téléphone */}
@@ -140,7 +239,7 @@ function ConfirmationContent() {
               <div>
                 <strong className="text-slate-900 block">Contrôle du plombage & Règlement</strong>
                 <span className="text-slate-500">
-                  Vous inspectez le scellé de garantie, donnez la vide et réglez {formatFCFA(order.totalAmount)} en espèces.
+                  Vous inspectez le scellé de garantie, donnez la vide et réglez {formatFCFA(activeOrder.totalAmount)} en espèces.
                 </span>
               </div>
             </div>
@@ -151,7 +250,7 @@ function ConfirmationContent() {
         <div className="mt-8 pt-6 border-t border-slate-100 text-left text-xs text-slate-600 space-y-2">
           <div className="flex justify-between">
             <span>Date & Heure :</span>
-            <span className="font-semibold text-slate-900">{formatDateAbidjan(order.createdAt)}</span>
+            <span className="font-semibold text-slate-900">{formatDateAbidjan(activeOrder.createdAt)}</span>
           </div>
           <div className="flex justify-between">
             <span>Bouteille demandée :</span>
@@ -161,11 +260,11 @@ function ConfirmationContent() {
           </div>
           <div className="flex justify-between">
             <span>Zone de livraison :</span>
-            <span className="font-semibold text-slate-900">{order.commune} ({order.quartier})</span>
+            <span className="font-semibold text-slate-900">{activeOrder.commune} ({activeOrder.quartier})</span>
           </div>
           <div className="flex justify-between items-baseline pt-2 border-t border-slate-200 text-sm">
             <span className="font-bold text-slate-900">Total à payer à la remise :</span>
-            <span className="text-xl font-black text-red-600">{formatFCFA(order.totalAmount)}</span>
+            <span className="text-xl font-black text-red-600">{formatFCFA(activeOrder.totalAmount)}</span>
           </div>
         </div>
 

@@ -23,7 +23,9 @@ import {
   X,
   ExternalLink,
   Lock,
+  LogOut,
 } from 'lucide-react';
+import { logoutAction } from '@/app/actions/auth';
 
 function AdminProtectedContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -186,37 +188,29 @@ function AdminProtectedContent({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* Bas de sidebar : Profil & Switch */}
+        {/* Bas de sidebar : Profil Actif & Déconnexion Sécurisée */}
         <div className="pt-6 border-t border-slate-800 space-y-3">
           <div className="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-              Test des permissions :
+              Session Authentifiée :
             </span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setCurrentRole('admin')}
-                className={`py-1.5 px-2 rounded-lg text-[11px] font-bold text-center transition-all ${
-                  currentRole === 'admin'
-                    ? 'bg-red-600 text-white shadow-sm'
-                    : 'bg-slate-950 text-slate-400 hover:text-white'
-                }`}
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentRole('operateur')}
-                className={`py-1.5 px-2 rounded-lg text-[11px] font-bold text-center transition-all ${
-                  currentRole === 'operateur'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-slate-950 text-slate-400 hover:text-white'
-                }`}
-              >
-                Opérateur
-              </button>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-white">
+                {currentRole === 'admin' ? 'M. Sylla (Admin)' : 'Aline K. (Opératrice)'}
+              </span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
           </div>
+
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold text-red-400 hover:text-white bg-red-950/40 hover:bg-red-900/60 border border-red-800/40 transition-colors"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Se déconnecter</span>
+            </button>
+          </form>
 
           <Link
             href="/"
@@ -276,6 +270,16 @@ function AdminProtectedContent({ children }: { children: React.ReactNode }) {
                 </span>
               </div>
             </div>
+
+            <form action={logoutAction} className="ml-1">
+              <button
+                type="submit"
+                title="Se déconnecter de la console"
+                className="p-2 rounded-xl bg-slate-900 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-slate-800 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </form>
           </div>
         </header>
 

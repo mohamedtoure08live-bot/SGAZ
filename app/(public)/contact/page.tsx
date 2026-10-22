@@ -1,11 +1,54 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Phone, MessageCircle, Mail, MapPin, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Phone, MessageCircle, Clock, AlertTriangle, CheckCircle2, Loader2, Send } from 'lucide-react';
 import { MOCK_SETTINGS } from '@/data/mock-data';
+import { submitContactMessageAction } from '@/app/actions/contact';
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Form state
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [orderNumber, setOrderNumber] = useState('');
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await submitContactMessageAction({
+        fullName,
+        phone,
+        orderNumber: orderNumber || undefined,
+        message,
+      });
+
+      if (res.success) {
+        setSubmitted(true);
+      } else {
+        setErrorMessage(res.error || 'Une erreur est survenue lors de l’envoi.');
+      }
+    } catch {
+      setErrorMessage('Impossible de contacter le serveur. Veuillez réessayer.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReset = () => {
+    setSubmitted(false);
+    setFullName('');
+    setPhone('');
+    setOrderNumber('');
+    setMessage('');
+    setErrorMessage(null);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
@@ -88,26 +131,26 @@ export default function ContactPage() {
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900">Message envoyé avec succès</h3>
+              <h3 className="text-xl font-bold text-slate-900">Message envoyé et enregistré dans Supabase !</h3>
               <p className="text-slate-500 text-sm mt-2">
-                Notre service d&apos;assistance vous répondra dans les plus brefs délais.
+                Notre service d&apos;assistance vous répondra dans les plus brefs délais par téléphone ou WhatsApp.
               </p>
               <button
-                onClick={() => setSubmitted(false)}
+                onClick={handleReset}
                 className="mt-6 px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs uppercase"
               >
                 Envoyer un autre message
               </button>
             </div>
           ) : (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSubmitted(true);
-              }}
-              className="space-y-5"
-            >
+            <form onSubmit={handleSubmit} className="space-y-5">
               <h3 className="text-lg font-bold text-slate-900">Envoyez-nous un message</h3>
+
+              {errorMessage && (
+                <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-semibold">
+                  {errorMessage}
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -117,6 +160,8 @@ export default function ContactPage() {
                   <input
                     type="text"
                     required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     placeholder="Ex: Kouamé David"
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                   />
@@ -128,6 +173,8 @@ export default function ContactPage() {
                   <input
                     type="tel"
                     required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     placeholder="+225 07 00 00 00 00"
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                   />
@@ -140,28 +187,43 @@ export default function ContactPage() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Ex: SGZ-2026-000105"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
+                  value={orderNumber}
+                  onChange={(e) => setOrderNumber(e.target.value)}
+                  placeholder="Ex: SGZ-2026-000101"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-600 mb-1.5">
-                  Votre message ou réclamation <span className="text-red-500">*</span>
+                  Votre message ou question <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   rows={4}
                   required
-                  placeholder="Décrivez votre situation ou votre demande..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Précisez ici votre besoin, la localisation ou toute question relative à votre livraison..."
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold uppercase text-sm tracking-wide transition-all"
+                disabled={isSubmitting}
+                className="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md"
               >
-                Transmettre au support
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Envoi en cours...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>Transmettre mon message</span>
+                  </>
+                )}
               </button>
             </form>
           )}

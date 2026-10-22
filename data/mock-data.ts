@@ -658,3 +658,125 @@ export const MOCK_AUDIT_LOGS: AuditLog[] = [
     timestamp: new Date(Date.now() - 40 * 60000).toISOString(),
   },
 ];
+
+// Alias et collections pour compatibilité universelle
+export const MOCK_DEPOTS = MOCK_PARTNERS;
+export const MOCK_ORDERS = INITIAL_ORDERS;
+
+export interface PartnerShopData {
+  id: string;
+  name: string;
+  commune: string;
+  quartier: string;
+  address: string;
+  landmark: string;
+  phone: string;
+  whatsapp: string;
+  hours: string;
+  rating: number;
+  brands: string[];
+  categories: string[];
+  featuredProducts?: {
+    name: string;
+    description: string;
+    badge: string;
+  }[];
+  advantages: string[];
+}
+
+export const PARTNER_SHOPS: PartnerShopData[] = [
+  {
+    id: 'shop-cocody-electro',
+    name: 'Ivoire Électro Confort',
+    commune: 'Cocody',
+    quartier: 'Angré 8e Tranche',
+    address: 'Boulevard Latrille, Immeuble Horizon Blanc',
+    landmark: 'À 50m de la Pharmacie des Grâces',
+    phone: '+225 07 48 00 11 22',
+    whatsapp: '+225 07 48 00 11 22',
+    hours: 'Lun - Sam : 08h30 - 19h30',
+    rating: 4.9,
+    brands: ['Beko', 'Midea', 'Whirlpool', 'Nasco'],
+    categories: ['gazinieres', 'fours', 'refrigerateurs', 'petit-electro'],
+    featuredProducts: [
+      {
+        name: 'Gazinière Inox Beko 4 Feux + Four Gaz Ventilé',
+        description: 'Allumage automatique une main, sécurité thermocouple et tournebroche intégré',
+        badge: 'Top Vente',
+      },
+      {
+        name: 'Micro-ondes Numérique Midea 25L Grill',
+        description: '900W de puissance, programmes automatiques décongélation et cuisson rapide',
+        badge: 'Coup de Cœur',
+      },
+    ],
+    advantages: [
+      'Garantie officielle 24 mois avec SAV dédié à Abidjan',
+      'Installation et raccordement gaz offerts en partenariat avec SOSGAZ',
+      'Paiement échelonné Wave & Orange Money disponible',
+    ],
+  },
+  {
+    id: 'shop-yopougon-gaz',
+    name: 'Maison du Chef Yopougon',
+    commune: 'Yopougon',
+    quartier: 'Maroc / Carrefour Oasis',
+    address: 'Voie principale Maroc, face Station Total',
+    landmark: 'Immeuble Bleu en face de la station',
+    phone: '+225 01 23 45 67 89',
+    whatsapp: '+225 01 23 45 67 89',
+    hours: 'Lun - Sam : 08h00 - 20h00',
+    rating: 4.8,
+    brands: ['Nasco', 'Roch', 'Smart Technology', 'Binatone'],
+    categories: ['gazinieres', 'refrigerateurs', 'petit-electro'],
+    featuredProducts: [
+      {
+        name: 'Cuisinière Nasco 50x50 Inox 4 Feux',
+        description: 'Couvercle en verre trempé, grille émaillée et double brûleur haute intensité',
+        badge: 'Meilleur Rapport Qualité/Prix',
+      },
+      {
+        name: 'Réfrigérateur Combiné No Frost Roch 260L',
+        description: 'Éclairage LED, tiroir fraîcheur légumes et classe énergétique A+',
+        badge: 'Grande Capacité',
+      },
+    ],
+    advantages: [
+      'Prix direct importateur les plus compétitifs d’Abidjan',
+      'Livraison expresse le jour même à Yopougon & Songon',
+      'Kit détendeur et tuyau sécurisé offert pour tout achat de gazinière',
+    ],
+  },
+  {
+    id: 'shop-marcory-premium',
+    name: 'Abidjan Cuisine & Design',
+    commune: 'Marcory',
+    quartier: 'Zone 4C',
+    address: 'Rue Paul Langevin, en face du supermarché',
+    landmark: 'Proche du carrefour Prima Center',
+    phone: '+225 07 10 20 30 40',
+    whatsapp: '+225 07 10 20 30 40',
+    hours: 'Lun - Sam : 09h00 - 19h00',
+    rating: 5.0,
+    brands: ['Bosch', 'Siemens', 'Tefal', 'Moulinex'],
+    categories: ['gazinieres', 'fours', 'petit-electro'],
+    featuredProducts: [
+      {
+        name: 'Piano de Cuisson Bosch Inox 90cm 5 Feux',
+        description: 'Brûleur Wok central double couronne 3.6kW et four grande capacité 112L',
+        badge: 'Haut de Gamme',
+      },
+      {
+        name: 'Robot Pâtissier Multifonction Moulinex Masterchef',
+        description: 'Bol inox 4.6L, kit pâtisserie complet et blender inclus',
+        badge: 'Cuisine Pro',
+      },
+    ],
+    advantages: [
+      'Showroom climatisé avec démonstrations culinaires le samedi',
+      'Produits 100% d’origine européenne certifiée',
+      'Service VIP : livraison soignée et mise en service par technicien',
+    ],
+  },
+];
+

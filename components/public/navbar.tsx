@@ -15,6 +15,7 @@ export function Navbar() {
     { label: 'Accueil', href: '/' },
     { label: 'Catalogue', href: '/catalogue' },
     { label: 'Commander', href: '/commander' },
+    { label: 'Boutiques', href: '/boutiques' },
     { label: 'Comment ça marche', href: '/comment-ca-marche' },
     { label: 'Zones Abidjan', href: '/zones' },
     { label: 'Devenir Partenaire', href: '/partenaire' },
